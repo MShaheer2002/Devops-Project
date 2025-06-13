@@ -46,30 +46,30 @@ EOF
     }
 
     stage('Generate Ansible Inventory') {
-  steps {
-    script {
-      def ip = sh(
+      steps {
+        script {
+          def ip = sh(
         script: 'terraform -chdir=terraform output -raw public_ip',
         returnStdout: true
       ).trim()
 
-      writeFile file: 'terraform/inventory', text: """
+          writeFile file: 'terraform/inventory', text: """
 [web]
 ${ip} ansible_user=azureuser ansible_ssh_private_key_file=~/.ssh/id_rsa
 """
+        }
+      }
     }
-  }
-}
 
-stage('Ansible Install Web Server') {
-  steps {
-    withCredentials([sshUserPrivateKey(
+    stage('Ansible Install Web Server') {
+      steps {
+        withCredentials([sshUserPrivateKey(
       credentialsId: 'vm-ssh-key',
       keyFileVariable: 'SSH_KEY',
       usernameVariable: 'SSH_USERNAME'
     )]) {
-      dir('ansible') {
-        sh '''
+          dir('ansible') {
+            sh '''
           # Install Ansible in a Python virtual environment
           python3 -m venv ansible-venv
           . ansible-venv/bin/activate
@@ -83,48 +83,48 @@ stage('Ansible Install Web Server') {
           # Run playbook
           ansible-playbook -i ../terraform/inventory install_web.yml
         '''
+          }
+    }
       }
     }
-  }
-}
 
     stage('Verify Deployment') {
       steps {
         script {
           def ip = sh(
-            script: 'terraform -chdir=terraform output -raw public_ip', 
+            script: 'terraform -chdir=terraform output -raw public_ip',
             returnStdout: true
           ).trim()
-          
+
           // Add retry logic with timeout
           def status = sh(
             script: "curl -s -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 10 --max-time 30 http://${ip}",
             returnStdout: true
           ).trim()
-          
-          if (status != "200") {
+
+          if (status != '200') {
             error("Verification failed - HTTP status ${status}")
           } else {
-            echo "Deployment verified successfully"
+            echo 'Deployment verified successfully'
           }
         }
       }
     }
   }
 
-  // post {
-  //   always {
-  //     dir('terraform') {
-  //       sh 'terraform output'
-  //     }
-  //     cleanWs()
-  //   }
-  //   failure {
-  //     emailext (
-  //       subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-  //       body: """Check console output at ${env.BUILD_URL}console""",
-  //       to: 'bscs2112351@gmail.com'
-  //     )
-  //   }
-  // }
+// post {
+//   always {
+//     dir('terraform') {
+//       sh 'terraform output'
+//     }
+//     cleanWs()
+//   }
+//   failure {
+//     emailext (
+//       subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+//       body: """Check console output at ${env.BUILD_URL}console""",
+//       to: 'bscs2112351@gmail.com'
+//     )
+//   }
+// }
 }

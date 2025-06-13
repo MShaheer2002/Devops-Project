@@ -37,7 +37,7 @@ variable "vm_admin_password" {
   sensitive   = true
 }
 
-variable "ssh_public_key_path" {
+variable "ssh_public_key" {
   description = "Path to your SSH public key"
   type        = string
 }

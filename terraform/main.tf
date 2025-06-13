@@ -9,6 +9,9 @@ provider "azurerm" {
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group
   location = var.location
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "azurerm_virtual_network" "vnet" {

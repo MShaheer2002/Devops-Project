@@ -57,6 +57,8 @@ EOF
               mkdir -p ~/.ssh
               cp "${SSH_KEY}" ~/.ssh/id_rsa
               chmod 600 ~/.ssh/id_rsa
+              # Install Ansible if not present
+              sudo apt-get update && sudo apt-get install -y ansible || sudo yum install -y ansible
               ansible-playbook -i ../terraform/inventory install_web.yml
             '''
           }
@@ -88,19 +90,19 @@ EOF
     }
   }
 
-  post {
-    always {
-      dir('terraform') {
-        sh 'terraform output'
-      }
-      cleanWs()
-    }
-    failure {
-      emailext (
-        subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-        body: """Check console output at ${env.BUILD_URL}console""",
-        to: 'bscs2112351@gmail.com'
-      )
-    }
-  }
+  // post {
+  //   always {
+  //     dir('terraform') {
+  //       sh 'terraform output'
+  //     }
+  //     cleanWs()
+  //   }
+  //   failure {
+  //     emailext (
+  //       subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+  //       body: """Check console output at ${env.BUILD_URL}console""",
+  //       to: 'bscs2112351@gmail.com'
+  //     )
+  //   }
+  // }
 }

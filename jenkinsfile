@@ -53,12 +53,20 @@ EOF
           usernameVariable: 'SSH_USERNAME'
         )]) {
           dir('ansible') {
-            sh '''
-              mkdir -p ~/.ssh
-              cp "${SSH_KEY}" ~/.ssh/id_rsa
-              chmod 600 ~/.ssh/id_rsa
-              ansible-playbook -i ../terraform/inventory install_web.yml
-            '''
+        sh '''
+          # Install Ansible in a Python virtual environment
+          python3 -m venv ansible-venv
+          source ansible-venv/bin/activate
+          pip install ansible
+          
+          # Setup SSH
+          mkdir -p ~/.ssh
+          cp "${SSH_KEY}" ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          
+          # Run playbook
+          ansible-playbook -i ../terraform/inventory install_web.yml
+        '''
           }
         }
       }

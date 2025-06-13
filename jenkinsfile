@@ -46,12 +46,6 @@ EOF
     }
 
     stage('Ansible Install Web Server') {
-      agent {
-        docker {
-          image 'python:3.9-alpine'
-          args '--user root -v /var/jenkins_home/.ssh:/root/.ssh'
-        }
-      }
       steps {
         withCredentials([sshUserPrivateKey(
           credentialsId: 'vm-ssh-key',
@@ -60,7 +54,9 @@ EOF
         )]) {
           dir('ansible') {
             sh '''
-              apk add --no-cache ansible openssh-client
+              mkdir -p ~/.ssh
+              cp "${SSH_KEY}" ~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
               ansible-playbook -i ../terraform/inventory install_web.yml
             '''
           }
@@ -76,6 +72,7 @@ EOF
             returnStdout: true
           ).trim()
           
+          // Add retry logic with timeout
           def status = sh(
             script: "curl -s -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 10 --max-time 30 http://${ip}",
             returnStdout: true
@@ -83,6 +80,8 @@ EOF
           
           if (status != "200") {
             error("Verification failed - HTTP status ${status}")
+          } else {
+            echo "Deployment verified successfully"
           }
         }
       }
@@ -100,9 +99,7 @@ EOF
       emailext (
         subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
         body: """Check console output at ${env.BUILD_URL}console""",
-        to: 'bscs2112351@gmail.com',
-        replyTo: 'm.shaheershahid12@gmail.com',
-        mimeType: 'text/html'
+        to: 'bscs2112351@gmail.com'
       )
     }
   }

@@ -47,9 +47,18 @@ EOF
 
     stage('Ansible Install Web Server') {
       steps {
-        sshagent(['vm-ssh-key']) {
+        withCredentials([sshUserPrivateKey(
+          credentialsId: 'vm-ssh-key',
+          keyFileVariable: 'SSH_KEY',
+          usernameVariable: 'SSH_USERNAME'
+        )]) {
           dir('ansible') {
-            sh 'ansible-playbook -i ../terraform/inventory install_web.yml'
+            sh '''
+              mkdir -p ~/.ssh
+              cp "${SSH_KEY}" ~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
+              ansible-playbook -i ../terraform/inventory install_web.yml
+            '''
           }
         }
       }
@@ -58,10 +67,40 @@ EOF
     stage('Verify Deployment') {
       steps {
         script {
-          def ip = sh(script: 'terraform -chdir=terraform output -raw public_ip', returnStdout: true).trim()
-          sh "curl http://${ip}"
+          def ip = sh(
+            script: 'terraform -chdir=terraform output -raw public_ip', 
+            returnStdout: true
+          ).trim()
+          
+          // Add retry logic with timeout
+          def status = sh(
+            script: "curl -s -o /dev/null -w '%{http_code}' --retry 5 --retry-delay 10 --max-time 30 http://${ip}",
+            returnStdout: true
+          ).trim()
+          
+          if (status != "200") {
+            error("Verification failed - HTTP status ${status}")
+          } else {
+            echo "Deployment verified successfully"
+          }
         }
       }
+    }
+  }
+
+  post {
+    always {
+      dir('terraform') {
+        sh 'terraform output'
+      }
+      cleanWs()
+    }
+    failure {
+      emailext (
+        subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+        body: """Check console output at ${env.BUILD_URL}console""",
+        to: 'devops-team@example.com'
+      )
     }
   }
 }

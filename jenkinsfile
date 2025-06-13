@@ -89,21 +89,21 @@ EOF
     }
   }
 
-  // post {
-  //   always {
-  //     dir('terraform') {
-  //       sh 'terraform output'
-  //     }
-  //     cleanWs()
-  //   }
-  //   failure {
-  //     emailext (
-  //       subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-  //       body: """Check console output at ${env.BUILD_URL}console""",
-  //       to: 'devops-team@example.com',
-  //       replyTo: 'devops-team@example.com',
-  //       mimeType: 'text/html'
-  //     )
-  //   }
-  // }
+  post {
+    always {
+      dir('terraform') {
+        sh 'terraform output'
+      }
+      cleanWs()
+    }
+    failure {
+      emailext (
+        subject: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+        body: """Check console output at ${env.BUILD_URL}console""",
+        to: 'bscs2112351@gmail.com',
+        replyTo: 'm.shaheershahid12@gmail.com',
+        mimeType: 'text/html'
+      )
+    }
+  }
 }

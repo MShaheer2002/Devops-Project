@@ -9,6 +9,24 @@ pipeline {
   }
 
   stages {
+    stage('Create .tfvars file') {
+      steps {
+        dir('terraform') {
+          // Dynamically generate .tfvars using Jenkins credentials
+          sh '''
+            cat > terraform.auto.tfvars <<EOF
+subscription_id     = "${ARM_SUBSCRIPTION_ID}"
+client_id           = "${ARM_CLIENT_ID}"
+client_secret       = "${ARM_CLIENT_SECRET}"
+tenant_id           = "${ARM_TENANT_ID}"
+vm_admin_password   = "P@ssw0rd"
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+EOF
+          '''
+        }
+      }
+    }
+
     stage('Terraform Init') {
       steps {
         dir('terraform') {

@@ -5,8 +5,6 @@ terraform/terraform.tfvars
 *.tfstate.backup
 crash.log
 
-.env
-
 # Ansible
 *.retry
 

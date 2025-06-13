@@ -55,7 +55,7 @@ disable_password_authentication = true
 
 admin_ssh_key {
   username   = var.vm_admin_username
-  public_key = file(var.ssh_public_key)
+  public_key = var.ssh_public_key
 }
   network_interface_ids           = [azurerm_network_interface.nic.id]
 

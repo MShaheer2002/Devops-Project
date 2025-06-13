@@ -24,7 +24,7 @@ variable "location" {
 }
 
 variable "resource_group" {
-  default = "devops-rg"
+  default = "devops-project-rg"
 }
 
 variable "vm_admin_username" {

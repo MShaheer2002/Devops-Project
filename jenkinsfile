@@ -57,8 +57,6 @@ EOF
               mkdir -p ~/.ssh
               cp "${SSH_KEY}" ~/.ssh/id_rsa
               chmod 600 ~/.ssh/id_rsa
-              # Install Ansible if not present
-              sudo apt-get update && sudo apt-get install -y ansible || sudo yum install -y ansible
               ansible-playbook -i ../terraform/inventory install_web.yml
             '''
           }

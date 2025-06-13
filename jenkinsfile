@@ -81,7 +81,7 @@ ${ip} ansible_user=azureuser ansible_ssh_private_key_file=~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
           # Run playbook
-          ansible-playbook -i ../terraform/inventory install_web.yml
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ../terraform/inventory install_web.yml
         '''
           }
     }

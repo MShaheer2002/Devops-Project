@@ -45,6 +45,22 @@ EOF
       }
     }
 
+    stage('Generate Ansible Inventory') {
+  steps {
+    script {
+      def ip = sh(
+        script: 'terraform -chdir=terraform output -raw public_ip',
+        returnStdout: true
+      ).trim()
+
+      writeFile file: 'terraform/inventory', text: """
+[web]
+${ip} ansible_user=azureuser ansible_ssh_private_key_file=~/.ssh/id_rsa
+"""
+    }
+  }
+}
+
 stage('Ansible Install Web Server') {
   steps {
     withCredentials([sshUserPrivateKey(

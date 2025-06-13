@@ -1,0 +1,23 @@
+- name: Configure web server and deploy Flutter Web app
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install Apache2
+      apt:
+        name: apache2
+        state: present
+
+    - name: Remove default index.html
+      file:
+        path: /var/www/html/index.html
+        state: absent
+
+    - name: Copy Flutter web app files
+      copy:
+        src: ../app/
+        dest: /var/www/html/
+        mode: 0755

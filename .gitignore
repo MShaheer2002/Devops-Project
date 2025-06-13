@@ -1,0 +1,19 @@
+# Terraform
+terraform/terraform.tfvars
+.terraform/
+*.tfstate
+*.tfstate.backup
+crash.log
+
+.env
+
+# Ansible
+*.retry
+
+# Flutter build output
+/app/build/
+**/build/
+
+# System
+.DS_Store
+*.log

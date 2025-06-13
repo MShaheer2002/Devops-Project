@@ -1,0 +1,47 @@
+pipeline {
+  agent any
+
+  environment {
+    ARM_SUBSCRIPTION_ID = credentials('azure-subscription-id')
+    ARM_CLIENT_ID       = credentials('azure-client-id')
+    ARM_CLIENT_SECRET   = credentials('azure-client-secret')
+    ARM_TENANT_ID       = credentials('azure-tenant-id')
+  }
+
+  stages {
+    stage('Terraform Init') {
+      steps {
+        dir('terraform') {
+          sh 'terraform init'
+        }
+      }
+    }
+
+    stage('Terraform Apply') {
+      steps {
+        dir('terraform') {
+          sh 'terraform apply -auto-approve'
+        }
+      }
+    }
+
+    stage('Ansible Install Web Server') {
+      steps {
+        sshagent(['vm-ssh-key']) {
+          dir('ansible') {
+            sh 'ansible-playbook -i ../terraform/inventory install_web.yml'
+          }
+        }
+      }
+    }
+
+    stage('Verify Deployment') {
+      steps {
+        script {
+          def ip = sh(script: 'terraform -chdir=terraform output -raw public_ip', returnStdout: true).trim()
+          sh "curl http://${ip}"
+        }
+      }
+    }
+  }
+}

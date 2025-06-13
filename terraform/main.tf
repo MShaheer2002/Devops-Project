@@ -43,6 +43,7 @@ resource "azurerm_public_ip" "public_ip" {
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
   allocation_method   = "Dynamic"
+  sku                 = "Basic"
 }
 
 resource "azurerm_linux_virtual_machine" "vm" {
@@ -51,13 +52,13 @@ resource "azurerm_linux_virtual_machine" "vm" {
   location                        = var.location
   size                            = "Standard_B1s"
   admin_username                  = var.vm_admin_username
-disable_password_authentication = true
+  disable_password_authentication = true
 
-admin_ssh_key {
-  username   = var.vm_admin_username
-  public_key = var.ssh_public_key
-}
-  network_interface_ids           = [azurerm_network_interface.nic.id]
+  admin_ssh_key {
+    username   = var.vm_admin_username
+    public_key = var.ssh_public_key
+  }
+  network_interface_ids = [azurerm_network_interface.nic.id]
 
   os_disk {
     name                 = "devops-osdisk"

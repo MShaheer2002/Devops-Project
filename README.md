@@ -113,6 +113,9 @@ docker run -d --name jenkins \
 5. Jenkins Credentails that are used overview
 ![Cred overview](screenshots/jenkins_credentials_overview.png)
 
+5. Jenkins run inside Docker
+![Jenkins running](screenshots/Jenkins_run_inside_docker.png)
+
 
 ---
 
